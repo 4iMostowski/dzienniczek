@@ -133,7 +133,8 @@
     </div>
 </section>
 <script>
-
+    const maxHours = 140;
+    let currentHours = 0;
     const journalSections = [
         {
             'title': 'Moduł wstępny',
@@ -238,7 +239,50 @@
     const sections = [documentItem.info, documentItem.journal, documentItem.summary];
     let items = [];
     let user = {};
-
+    if(localStorage.getItem("userInfo")){
+        documentItem.infoForm.classList.remove("active");
+        documentItem.infoContent.classList.add("active");
+        documentItem.summaryBtn.disabled = false;
+        documentItem.journalBtn.disabled = false;
+    setInfo();
+    }
+    if(localStorage.getItem("journalItems")){
+        for(const item of JSON.parse(localStorage.getItem("journalItems"))){
+            items.push(item);
+            console.log(item);
+        journalSections.filter(topic => topic.title.includes(item.section))[0].hours += parseInt(item.hours);
+        currentHours += parseInt(item.hours);
+        const itemBox = 'div';
+        const element = document.createElement(itemBox);
+        element.className = 'journal-item'
+        element.innerHTML = `
+        <div class="item-inner">
+            <div class="item-top">
+            <h2 class="section">
+                Dział: <strong>${item.section}</strong>
+            </h2>
+            <div class="date">
+               Data: <strong>    ${item.date} </strong>
+            </div>
+            <div class="patron">
+              Opiekun: <strong>${item.patron}</strong>
+            </div>
+           </div>
+           <h3 class="topic">
+            Temat:  <strong> ${item.topic} </strong>
+            </h3>
+              <div class="hours">
+              Godzin: <strong> ${item.hours} </strong>
+            </div>
+            <p class="text">
+            <strong>Sprawozdanie: </strong> <br>
+                ${item.report}
+            </p>
+        </div>`;
+        changeHours();
+        documentItem.journalList.append(element)
+        }
+    }
     function saveInfo() {
         event.preventDefault();
 
@@ -252,18 +296,21 @@
             start: document.querySelector("#start").value,
             finish: document.querySelector("#finish").value
         };
+        localStorage.setItem("userInfo", JSON.stringify(user));
         setInfo();
     }
 
     function setInfo() {
+        const userTemp = JSON.parse(localStorage.getItem("userInfo"))
+        console.log(userTemp);
         document.querySelector('#date').min = document.querySelector("#start").value;
         document.querySelector('#date').max = document.querySelector("#finish").value;
-        document.querySelector("#showedName").innerHTML = user.fullName;
-        document.querySelector("#showedClass").innerHTML = user.class;
-        document.querySelector("#showedYear").innerHTML = user.year;
-        document.querySelector("#showedFirm").innerHTML = user.firm;
-        document.querySelector("#showedStart").innerHTML = user.start;
-        document.querySelector("#showedFinish").innerHTML = user.finish;
+        document.querySelector("#showedName").innerHTML = userTemp.fullName;
+        document.querySelector("#showedClass").innerHTML = userTemp.class;
+        document.querySelector("#showedYear").innerHTML = userTemp.year;
+        document.querySelector("#showedFirm").innerHTML = userTemp.firm;
+        document.querySelector("#showedStart").innerHTML = userTemp.start;
+        document.querySelector("#showedFinish").innerHTML = userTemp.finish;
         documentItem.summaryBtn.disabled = false;
         documentItem.journalBtn.disabled = false;
     }
@@ -279,8 +326,7 @@
         section.classList.toggle("active");
     }
 
-    const maxHours = 140;
-    let currentHours = 0;
+
 
     function changeHours() {
         document.querySelector('.hoursPassed').innerHTML = currentHours;
@@ -345,8 +391,11 @@
                 ${tempObject.report}
             </p>
         </div>`;
+        changeHours();
+        
         documentItem.journalList.append(element)
         changeHours();
+        localStorage.setItem("journalItems", JSON.stringify(items));
     }
 
     function addForm() {

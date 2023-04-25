@@ -133,6 +133,7 @@
     </div>
 </section>
 <script>
+    
     const maxHours = 140;
     let currentHours = 0;
     const journalSections = [
@@ -183,6 +184,8 @@
             ],
         }
     ];
+   
+        /* dodawanie opcji do selecta */
     for (let i = 0; i < journalSections.length; i++) {
         const opt = document.createElement('option');
         opt.value = journalSections[i].title;
@@ -239,6 +242,8 @@
     const sections = [documentItem.info, documentItem.journal, documentItem.summary];
     let items = [];
     let user = {};
+
+    /* jezeli juz uzupelniony formsik automatycznie go pomijaj */
     if(localStorage.getItem("userInfo")){
         documentItem.infoForm.classList.remove("active");
         documentItem.infoContent.classList.add("active");
@@ -246,6 +251,7 @@
         documentItem.journalBtn.disabled = false;
     setInfo();
     }
+    /* jezeli juz dodane itemki do journala, automatycznie je dodaj */
     if(localStorage.getItem("journalItems")){
         for(const item of JSON.parse(localStorage.getItem("journalItems"))){
             items.push(item);
@@ -283,10 +289,11 @@
         documentItem.journalList.append(element)
         }
     }
+    /* zapisz informacje o uzytkowniku z formsa */
     function saveInfo() {
         event.preventDefault();
 
-        documentItem.infoForm.classList.remove("active");
+        documentItem.infoForm.classList.remove("active"); 
         documentItem.infoContent.classList.add("active");
         user = {
             fullName: `${document.querySelector("#name").value} ${document.querySelector("#surname").value}`,
@@ -300,6 +307,7 @@
         setInfo();
     }
 
+/* wypluj te informacje na strone */
     function setInfo() {
         const userTemp = JSON.parse(localStorage.getItem("userInfo"))
         console.log(userTemp);
@@ -314,7 +322,7 @@
         documentItem.summaryBtn.disabled = false;
         documentItem.journalBtn.disabled = false;
     }
-
+/* klik guzik zmienia sie sekcja */
     function active(btn, section) {
         sections.forEach(element => {
             element.classList.remove("active");
@@ -327,7 +335,7 @@
     }
 
 
-
+/* zmien ilosc godzin ktore zostaly wypelnione */
     function changeHours() {
         document.querySelector('.hoursPassed').innerHTML = currentHours;
         document.querySelector('.hoursLeft').innerHTML = maxHours - currentHours;
@@ -347,7 +355,7 @@
             document.querySelector('#summaryTable').innerHTML += tr;
         }
     }
-
+/* dodaj itemki do dziennika */
     function add() {
         event.preventDefault();
         documentItem.journalForm.classList.remove("active");
@@ -397,11 +405,13 @@
         changeHours();
         localStorage.setItem("journalItems", JSON.stringify(items));
     }
-
+   
     function addForm() {
         documentItem.journalContent.classList.toggle("active");
         documentItem.journalForm.classList.toggle("active");
     }   
+
+    /* przypisz akcje do guziczkow */
     documentItem.addBtn.addEventListener("click", addForm);
     documentItem.infoBtn.addEventListener("click", function () {
         active(this, documentItem.info)
@@ -417,7 +427,7 @@
         documentItem.infoForm.classList.add("active");
     });
 
-
+    /* w momencie gdy w formularzu uzytkownika zmieni date poczatkowa lub koncowa, druga z dat zostaje zmieniona na +- 30 dni */
     function setDate(item){
         if(item == "start"){
                 document.querySelector("#finish").value = `${new Date(new Date( document.querySelector("#start").value).getTime()  + 2629800000 ).getFullYear()}-${new Date(new Date( document.querySelector("#start").value).getTime()  + 2629800000 ).getMonth() + 1 < 10 ? "0" + (new Date(new Date( document.querySelector("#start").value).getTime()  + 2629800000 ).getMonth() + 1 ) : ( new Date(new Date( document.querySelector("#start").value).getTime()  + 2629800000 ).getMonth() + 1)}-${new Date(new Date( document.querySelector("#start").value).getTime()  + 2629800000 ).getDate() < 10 ? '0' + new Date(new Date( document.querySelector("#start").value).getTime()  + 2629800000 ).getDate(): new Date(new Date( document.querySelector("#start").value).getTime()  + 2629800000 ).getDate()}`;

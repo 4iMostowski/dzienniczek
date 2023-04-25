@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dzienniczek</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<section class="main-box">
+    <div class="control">
+        <h1 class="main-title">Dzienniczek praktyki zawodowej</h1>
+        <div class="control-btns">
+            <button id="infoBtn" class="active btn btn-md btn-primary">
+                Metryczka
+            </button>
+            <button id="journalBtn" class="btn btn-md btn-primary">
+                Dziennik Zajęć
+            </button>
+            <button id="summaryBtn" class="btn btn-md btn-primary">
+                Podsumowanie
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="info active">
+
+            <form onsubmit="saveInfo();" id="editInfo" class="active" action="#">
+                <h2 class="title">Wprowadź dane ucznia i praktyki</h2>
+                <label for="name"> Imię: <input type="text" placeholder="imię" id="name" name="name" required></label>
+                <label for="surname" required> Nazwisko: <input required type="text" id="surname" name="surname"
+                                                                placeholder="nazwisko"></label>
+                <label for="class"> Klasa: <input required type="text" placeholder="klasa" id="class"
+                                                  name="class"></label>
+                <label for="year"> Rocznik:<input required type="text" placeholder="2022/2023" id="year"
+                                                  name="year"></label>
+                <label for="firm">W firmie: <input required type="text" name="firm" id="firm"
+                                                   placeholder="firma"></label>
+                <div class="time">
+                    <h3 class="subtitle"> Czas trwania praktyki </h3>
+                    <label for="start">Rozpoczecie: <input onchange="setDate('start')" required type="date" id="start" name="start"
+                                                           value="2023-03-27"></label>
+                    <label for="finish">Zakonczenie: <input onchange="setDate('finish')" required type="date" id="finish" name="finish"
+                        value="2023-04-27"></label>
+                </div>
+                <input required type="submit" class="btn" id="saveForm" placeholder="zapisz" value="zapisz">
+            </form>
+
+            <div class="info-content">
+                <h2 class="title">Dane ucznia</h2>
+                <p>Imię i nazwisko <strong> <span id="showedName"> </span> </strong></p>
+                <p>Klasa:  <strong> <span id="showedClass"> </span>  </strong>, w roku szkolnym  <strong> <span id="showedYear"> </span>  </strong></p>
+                <p>Odbytej w  <strong> <span id="showedFirm"></span>  </strong></p>
+                <p>W terminie od:  <strong>  <span id="showedStart"></span>  </strong> do  <strong> <span id="showedFinish"> </span>  </strong></p>
+
+                <button id="editInfoBtn" class="btn btn-md btn-secondary">
+                    Edytuj
+                </button>
+            </div>
+        </div>
+        <div class="journal">
+            <div class="journal-content active">
+                <h2 class="main-title">
+                    Zrealizowane tematy
+                </h2>
+                <div class="journal-list">
+                </div>
+                <button id="addItem" class="btn btn-md btn-secondary">
+                    Dodaj tematy
+                </button>
+
+            </div>
+            <form onsubmit="add()" id="journalForm">
+                <label for="date">Data:
+                    <input required type="date" name="date" id="date">
+                </label>
+                <label for="section">Dział
+                    <select id="section" name="section">
+
+                    </select>
+                </label>
+                <label for="topic">Temat
+                    <select id="topic" name="topic">
+
+                    </select></label>
+                <label for="patron"> opiekun:
+                    <input type="text" id="patron" name="patron">
+                </label>
+                <label for="hours">
+                    Godzin:
+                    <input name="hours" id="hours" type="number" max="8" min="1">
+                </label>
+                <label for="report">
+                    sprawozdanie:
+                    <textarea name="report" id="report" cols="30" rows="3"></textarea>
+                </label>
+                <input type="submit"  class="btn" value="dodaj">
+            </form>
+        </div>
+        <div class="summary">
+            <h1 class="main-title">
+                Podsumowanie
+            </h1>
+            <table id="summaryTable">
+                <tr>
+
+                </tr>
+            </table>
+            <div class="summary-hours">
+                <div class="hours-wrapper">
+                    <div class="caption"> Przepracowane:
+                    </div>
+                    <div class="hoursPassed">
+                        0
+                    </div>
+                </div>
+                <div class="hours-wrapper">
+                  <div class="caption">  Zostało:</div>
+                    <div class="hoursLeft">
+                        140
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        copyright© Szymon Mostowski 2023 
+    </div>
+</section>
+<script>
+
+    const journalSections = [
+        {
+            'title': 'Moduł wstępny',
+            'hours': 0,
+            'topics': [
+                {
+                    'title': 'Czynności wstępne i szkolenia, struktura i organizacja pracy infromatyków',
+                },
+                {
+                    'title': 'Struktura organizacyjna przedsiębiorstwa i elementy przetwarzania informacji',
+                },
+            ],
+        },
+        {
+            'title': 'Montaż, naprawa, konserwacja i obsługa sprzętu komputerowego',
+            'hours': 0,
+            'topics': [
+                {
+                    'title': 'Obsługa sprzętu komputerowego, oprogramowania systemowego i diagnostycznego',
+                },
+                {
+                    'title': 'Diagnostyka, naprawa urządzeń IT',
+                },
+                {
+                    'title': 'Zasady administrowania systemami informatycznymi i archiwizowania danych',
+                },
+
+                {
+                    'title': 'Dokumentacja technologiczna przetwarzania informacji',
+                },
+            ],
+        },
+        {
+            'title': 'Sieci komputerowe',
+            'hours': 0,
+            'topics': [
+                {
+                    'title': 'Zapoznanie z programy do administracji lokalnymi sieciami komputerowymi',
+                },
+                {
+                    'title': 'Biblioteki oprogramowania i zbiorów danych',
+                },
+                {
+                    'title': 'Metody wyszukiwania awarii lokalnej siec komputerowej. Rodzaje awarii sieciowych i ich przyczyny',
+                },
+            ],
+        }
+    ];
+    for (let i = 0; i < journalSections.length; i++) {
+        const opt = document.createElement('option');
+        opt.value = journalSections[i].title;
+        opt.innerHTML = journalSections[i].title;
+        document.querySelector('#section').appendChild(opt);
+    }
+    for (let i = 0; i < journalSections.length; i++) {
+        const tr = `
+        <tr>
+        <td>
+        ${journalSections[i].title}
+</td>
+<td>
+  ${journalSections[i].hours}
+</td>
+        </tr>
+        `;
+        document.querySelector('#summaryTable').innerHTML += tr;
+    }
+    for (let i = 0; i < journalSections.length; i++) {
+        const opt = document.createElement('option');
+        opt.disabled = true;
+        opt.style.fontWeight = 800;
+        opt.style.color = "#000";
+        opt.value = journalSections[i].title;
+        opt.innerHTML = journalSections[i].title;
+        document.querySelector('#topic').appendChild(opt);
+        for (let j = 0; j < journalSections[i].topics.length; j++) {
+            const opt = document.createElement('option');
+            opt.disabled = false;
+            opt.value = journalSections[i].topics[j].title;
+            opt.innerHTML = journalSections[i].topics[j].title;
+            document.querySelector('#topic').appendChild(opt);
+        }
+    }
+    const documentItem = {
+        'formBtn': document.querySelector("#saveForm"),
+        'infoBtn': document.querySelector("#infoBtn"),
+        'editBtn': document.querySelector("#editInfoBtn"),
+        'journalBtn': document.querySelector("#journalBtn"),
+        'summaryBtn': document.querySelector("#summaryBtn"),
+        'info': document.querySelector(".info"),
+        'journal': document.querySelector(".journal"),
+        'summary': document.querySelector(".summary"),
+        'infoForm': document.querySelector("#editInfo"),
+        'infoContent': document.querySelector(".info-content"),
+        'addBtn': document.querySelector("#addItem"),
+        'journalForm': document.querySelector("#journalForm"),
+        'journalContent': document.querySelector('.journal-content'),
+        'journalList': document.querySelector('.journal-list'),
+    };
+    documentItem.summaryBtn.disabled = true;
+    documentItem.journalBtn.disabled = true;
+    const sections = [documentItem.info, documentItem.journal, documentItem.summary];
+    let items = [];
+    let user = {};
+
+    function saveInfo() {
+        event.preventDefault();
+
+        documentItem.infoForm.classList.remove("active");
+        documentItem.infoContent.classList.add("active");
+        user = {
+            fullName: `${document.querySelector("#name").value} ${document.querySelector("#surname").value}`,
+            class: document.querySelector("#class").value,
+            year: document.querySelector("#year").value,
+            firm: document.querySelector("#firm").value,
+            start: document.querySelector("#start").value,
+            finish: document.querySelector("#finish").value
+        };
+        setInfo();
+    }
+
+    function setInfo() {
+        document.querySelector('#date').min = document.querySelector("#start").value;
+        document.querySelector('#date').max = document.querySelector("#finish").value;
+        document.querySelector("#showedName").innerHTML = user.fullName;
+        document.querySelector("#showedClass").innerHTML = user.class;
+        document.querySelector("#showedYear").innerHTML = user.year;
+        document.querySelector("#showedFirm").innerHTML = user.firm;
+        document.querySelector("#showedStart").innerHTML = user.start;
+        document.querySelector("#showedFinish").innerHTML = user.finish;
+        documentItem.summaryBtn.disabled = false;
+        documentItem.journalBtn.disabled = false;
+    }
+
+    function active(btn, section) {
+        sections.forEach(element => {
+            element.classList.remove("active");
+        });
+        documentItem.infoBtn.classList.remove("active");
+        documentItem.journalBtn.classList.remove("active");
+        documentItem.summaryBtn.classList.remove("active");
+        btn.classList.add("active");
+        section.classList.toggle("active");
+    }
+
+    const maxHours = 140;
+    let currentHours = 0;
+
+    function changeHours() {
+        document.querySelector('.hoursPassed').innerHTML = currentHours;
+        document.querySelector('.hoursLeft').innerHTML = maxHours - currentHours;
+
+        document.querySelector('#summaryTable').innerHTML = "";
+        for (let i = 0; i < journalSections.length; i++) {
+            const tr = `
+        <tr>
+        <td>
+        ${journalSections[i].title}
+</td>
+<td>
+  ${journalSections[i].hours}
+</td>
+        </tr>
+        `;
+            document.querySelector('#summaryTable').innerHTML += tr;
+        }
+    }
+
+    function add() {
+        event.preventDefault();
+        documentItem.journalForm.classList.remove("active");
+        documentItem.journalContent.classList.add("active");
+        const tempObject =
+            {
+                'section': document.querySelector('#section').value,
+                'date': document.querySelector('#date').value,
+                'report': document.querySelector('#report').value,
+                'patron': document.querySelector('#patron').value,
+                'topic': document.querySelector('#topic').value,
+                'hours': document.querySelector('#hours').value,
+            };
+        journalSections.filter(topic => topic.title.includes(tempObject.section))[0].hours += parseInt(tempObject.hours);
+        currentHours += parseInt(tempObject.hours);
+        items.push(tempObject);
+        const itemBox = 'div';
+        const element = document.createElement(itemBox);
+        element.className = 'journal-item'
+        element.innerHTML = `
+        <div class="item-inner">
+            <div class="item-top">
+            <h2 class="section">
+                Dział: <strong>${tempObject.section}</strong>
+            </h2>
+            <div class="date">
+               Data: <strong>    ${tempObject.date} </strong>
+            </div>
+            <div class="patron">
+              Opiekun: <strong>${tempObject.patron}</strong>
+            </div>
+           </div>
+           <h3 class="topic">
+            Temat:  <strong> ${tempObject.topic} </strong>
+            </h3>
+              <div class="hours">
+              Godzin: <strong> ${tempObject.hours} </strong>
+            </div>
+            <p class="text">
+            <strong>Sprawozdanie: </strong> <br>
+                ${tempObject.report}
+            </p>
+        </div>`;
+        documentItem.journalList.append(element)
+        changeHours();
+    }
+
+    function addForm() {
+        documentItem.journalContent.classList.toggle("active");
+        documentItem.journalForm.classList.toggle("active");
+    }   
+    documentItem.addBtn.addEventListener("click", addForm);
+    documentItem.infoBtn.addEventListener("click", function () {
+        active(this, documentItem.info)
+    });
+    documentItem.journalBtn.addEventListener("click", function () {
+        active(this, documentItem.journal)
+    });
+    documentItem.summaryBtn.addEventListener("click", function () {
+        active(this, documentItem.summary)
+    });
+    documentItem.editBtn.addEventListener("click", function () {
+        documentItem.infoContent.classList.remove("active");
+        documentItem.infoForm.classList.add("active");
+    });
+
+
+    function setDate(item){
+        if(item == "start"){
+                document.querySelector("#finish").value = `${new Date(new Date( document.querySelector("#start").value).getTime()  + 2629800000 ).getFullYear()}-${new Date(new Date( document.querySelector("#start").value).getTime()  + 2629800000 ).getMonth() + 1 < 10 ? "0" + (new Date(new Date( document.querySelector("#start").value).getTime()  + 2629800000 ).getMonth() + 1 ) : ( new Date(new Date( document.querySelector("#start").value).getTime()  + 2629800000 ).getMonth() + 1)}-${new Date(new Date( document.querySelector("#start").value).getTime()  + 2629800000 ).getDate() < 10 ? '0' + new Date(new Date( document.querySelector("#start").value).getTime()  + 2629800000 ).getDate(): new Date(new Date( document.querySelector("#start").value).getTime()  + 2629800000 ).getDate()}`;
+        }else{
+            document.querySelector("#start").value = `${new Date(new Date( document.querySelector("#finish").value).getTime()  - 2629800000 ).getFullYear()}-${new Date(new Date( document.querySelector("#finish").value).getTime()  - 2629800000 ).getMonth() + 1 < 10 ? "0" + (new Date(new Date( document.querySelector("#finish").value).getTime()  - 2629800000 ).getMonth() + 1 ) : ( new Date(new Date( document.querySelector("#finish").value).getTime()  - 2629800000 ).getMonth() + 1)}-${new Date(new Date( document.querySelector("#finish").value).getTime()  - 2629800000 ).getDate() < 10 ? '0' + new Date(new Date( document.querySelector("#finish").value).getTime()  - 2629800000 ).getDate(): new Date(new Date( document.querySelector("#finish").value).getTime()  - 2629800000 ).getDate()}`;
+
+        }
+    }
+</script>
+</body>
+</html>
